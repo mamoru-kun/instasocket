@@ -1,9 +1,9 @@
 <?php
+require_once 'Config.php';
 require_once __DIR__.'/vendor/autoload.php';
 
 use Workerman\Worker;
 use Workerman\Lib\Timer;
-require_once 'Config.php';
 
 $worker = new Worker('websocket://0.0.0.0:'.Config::PORT);
 Worker::$daemonize = !Config::DEBUG_MODE;
@@ -49,8 +49,8 @@ $worker->onWorkerStart = function($worker) {
         if (sizeof($diff) > 0) {
           $GLOBALS['posts'] = $freshdata;
           console_log("Got ".sizeof($diff)." new posts!");
-          foreach($worker->connections as $connection) {
-            $connection->send(json_encode($freshdata['data']));
+          foreach($worker->connections as $conn) {
+            $conn->send(json_encode($freshdata['data']));
           }
         } else {
           console_log("No changes at all.");
@@ -64,14 +64,19 @@ $worker->onWorkerStart = function($worker) {
 
 $worker->onConnect = function($conn) {
   console_log("New connection from ".$conn->getRemoteIp());
-  $conn->onWebSocketConnect = function($connection) {
+  $conn->onWebSocketConnect = function($conn, $http_header) {
+    if ($_SERVER['HTTP_ORIGIN'] !== Config::ALLOWED_ORIGIN) {
+      console_log("Closing the connection because origin ".$_SERVER['HTTP_ORIGIN']." is invalid!");
+      return $conn->close();
+    }
+
     $data = $GLOBALS['posts'];
 
     if ($data['meta']['code'] !== 200) {
-      $connection->send(json_encode($data['meta']));
+      $conn->send(json_encode($data['meta']));
       console_log("Sent an error ".$data['meta']['code']);
     } else {
-      $connection->send(json_encode($data['data']));
+      $conn->send(json_encode($data['data']));
       console_log("Sent data");
     }
   };
