@@ -1,7 +1,7 @@
 # InstaSocket
 
 ## How it works
-It gets posts from Instagram using your Instagram App's *access token* and requests them again and again every 5 seconds (you can change it in `./Config.php`). If there's changes in posts collection the server sends it to all of the connected clients (your website visitors).
+It gets posts from Instagram using your Instagram App's *access token* and requests them again and again every 10 seconds (you can change it in `./Config.php`). If there's changes in posts collection the server sends it to all of the connected clients (your website visitors).
 
 ## Requirements
 - PHP 7+
