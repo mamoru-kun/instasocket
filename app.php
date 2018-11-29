@@ -25,40 +25,47 @@ function getInstagramPosts() {
   $result = json_decode($data, true);
   // print_r($result);
   if ($result['meta']['code'] === 200) {
-    console_log("getInstagramPosts(): got new posts");
+    console_log("getInstagramPosts(): got posts collection");
   } else {
     console_log("getInstagramPosts(): got error:");
-    console_log($result['meta']['code']);
-    console_log($result['meta']['error_message']);
+    print_r($result);
   }
   return $result;
 }
 
-$GLOBALS['data'] = getInstagramPosts();
+function compare_function($a, $b) {
+  return $a['id'] === $b['id'] ? 0 : 1;
+}
+
+$GLOBALS['posts'] = getInstagramPosts();
 
 $worker->onWorkerStart = function($worker) {
-  Timer::add(Config::REFRESH_DELAY, function() use($worker) {
-    $freshdata = getInstagramPosts();
-    if ($freshdata['meta']['code'] === 200) {
-      $diff = array_diff(array_map('serialize', $freshdata['data']), array_map('serialize', $GLOBALS['data']['data']));
+  if ($GLOBALS['posts']['meta']['code'] === 200) {
+    Timer::add(Config::REFRESH_DELAY, function() use($worker) {
+      $freshdata = getInstagramPosts();
+      if ($freshdata['meta']['code'] === 200) {
+        $diff = array_udiff($freshdata['data'], $GLOBALS['posts']['data'], 'compare_function');
 
-      if (sizeof($diff) > 0) {
-        $GLOBALS['data'] = $freshdata;
-        foreach($worker->connections as $connection) {
-          $connection->send(json_encode($freshdata['data']));
+        if (sizeof($diff) > 0) {
+          $GLOBALS['posts'] = $freshdata;
+          console_log("Got ".sizeof($diff)." new posts!");
+          foreach($worker->connections as $connection) {
+            $connection->send(json_encode($freshdata['data']));
+          }
+        } else {
+          console_log("No changes at all.");
         }
-        console_log("Got ".sizeof($diff)." new posts!");
-      } else {
-        console_log("No changes at all.");
       }
-    }
-  });
+    });
+  } else {
+    console_log("Got no post so I wont update it.");
+  }
 };
 
 $worker->onConnect = function($conn) {
+  console_log("New connection from ".$conn->getRemoteIp());
   $conn->onWebSocketConnect = function($connection) {
-    console_log("New connection");
-    $data = $GLOBALS['data'];
+    $data = $GLOBALS['posts'];
 
     if ($data['meta']['code'] !== 200) {
       $connection->send(json_encode($data['meta']));
@@ -71,7 +78,7 @@ $worker->onConnect = function($conn) {
 };
 
 $worker->onClose = function($conn) {
-  console_log("Connection closed");
+  console_log($conn->getRemoteIp()." connection closed");
 };
 
 Worker::runAll();
