@@ -6,7 +6,7 @@ use Workerman\Lib\Timer;
 require_once 'Config.php';
 
 $worker = new Worker('websocket://0.0.0.0:'.Config::PORT);
-$worker->count = 8;
+Worker::$daemonize = !Config::DEBUG_MODE;
 
 function console_log($str) {
   $data = date('Y.m.d H:i:s');
