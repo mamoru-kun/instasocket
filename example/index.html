@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>InstaSocket Example page</title>
+</head>
+<body>
+  <style media="screen">
+    #app img {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      margin: 15px;
+      box-shadow:  0 0 15px 0 #545454;
+    }
+  </style>
+  <div id="app"></div>
+  <script>
+    var ws = new WebSocket("ws://inst.krotpavel.local:2346")
+    let $app = document.querySelector('#app')
+
+    ws.onopen = () => {
+      console.log('connection succeed.')
+    }
+
+    ws.onerror = e => {
+      $app.innerHTML = `<h1>I can't connect to your websocket! Did you launch it?</h1>`
+    }
+
+    ws.onmessage = e => {
+      console.info("Got new images!")
+      let data = JSON.parse(e.data)
+      console.log(data)
+
+      $app.innerHTML = ''
+      data.forEach(photo => {
+        let image = document.createElement('img')
+        image.src = photo.images.standard_resolution.url
+        $app.appendChild(image)
+      })
+    }
+  </script>
+</body>
+</html>
