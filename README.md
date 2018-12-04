@@ -35,8 +35,8 @@ Posts collection refresh delay in seconds. Instagram allows to make up to **500*
 ### `PORT (int)`
 The port you want to host the web socket at.
 
-### `ALLOWED_ORIGIN (string)`
-The website you want to accept the connection from. Set to `*` if you want to allow to use your web socket to everyone.
+### `ALLOWED_ORIGINS (string|string[])`
+The websites you want to accept the connection from. Set to `"*"` if you want to allow to use your web socket to everyone.
 
 ### `DEBUG_MODE (bool)`
 Set to `false` in production.

@@ -65,7 +65,15 @@ $worker->onWorkerStart = function($worker) {
 $worker->onConnect = function($conn) {
   console_log("New connection from ".$conn->getRemoteIp());
   $conn->onWebSocketConnect = function($conn, $http_header) {
-    if ($_SERVER['HTTP_ORIGIN'] !== Config::ALLOWED_ORIGIN) {
+    $connection_valid = Config::ALLOWED_ORIGINS !== '*'
+      ? in_array($_SERVER['HTTP_ORIGIN'], Config::ALLOWED_ORIGINS)
+      : true;
+    if (Config::DEBUG_MODE) {
+      console_log("The origin is " . $_SERVER['HTTP_ORIGIN']);
+      console_log("The allowed origin is " . Config::ALLOWED_ORIGINS);
+      console_log("The origin is " . ($connection_valid ? "" : "not ") . "valid!");
+    }
+    if (!$connection_valid) {
       console_log("Closing the connection because origin ".$_SERVER['HTTP_ORIGIN']." is invalid!");
       return $conn->close();
     }
