@@ -8,12 +8,26 @@
 </head>
 <body>
   <style media="screen">
+    #app {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-start;
+    }
+    #app figure {
+      display: inline-flex;
+      flex-direction: column;
+      padding: 0;
+      width: 300px;
+      margin: 15px;
+    }
     #app img {
       width: 300px;
       height: 300px;
       object-fit: cover;
-      margin: 15px;
-      box-shadow:  0 0 15px 0 #545454;
+      box-shadow: 0 0 15px 0 #545454;
+    }
+    #app figcaption {
+      width: 100%;
     }
   </style>
   <div id="app"></div>
@@ -36,9 +50,16 @@
 
       $app.innerHTML = ''
       data.forEach(photo => {
+        let figure = document.createElement('figure')
+        figure.id = photo.id
         let image = document.createElement('img')
         image.src = photo.images.standard_resolution.url
-        $app.appendChild(image)
+        let figcaption = document.createElement('figcaption')
+        figcaption.innerHTML = `Likes: ${photo.likes.count}<br>Comments: ${photo.comments.count}`
+        figure.appendChild(image)
+        figure.appendChild(figcaption)
+
+        $app.appendChild(figure)
       })
     }
   </script>
