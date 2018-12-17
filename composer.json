@@ -1,9 +1,11 @@
 {
     "name": "mamoru-kun/instasocket",
+    "version": "1.0.0",
     "description": "Instagram synchronizing server based on WebSocket",
     "type": "project",
     "require": {
-        "workerman/workerman": "^3.5"
+        "workerman/workerman": "^3.5",
+        "vlucas/phpdotenv": "^2.5"
     },
     "license": "MIT",
     "authors": [

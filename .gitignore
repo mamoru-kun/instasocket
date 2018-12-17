@@ -1,3 +1,7 @@
 vendor
-Config.php
 composer.lock
+.env
+.vscode
+.vs
+.idea
+.DS_Store
