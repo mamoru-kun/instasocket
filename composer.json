@@ -1,5 +1,6 @@
 {
     "name": "mamoru-kun/instasocket",
+    "version": "1.0.0",
     "description": "Instagram synchronizing server based on WebSocket",
     "type": "project",
     "require": {
