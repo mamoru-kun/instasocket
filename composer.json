@@ -3,7 +3,8 @@
     "description": "Instagram synchronizing server based on WebSocket",
     "type": "project",
     "require": {
-        "workerman/workerman": "^3.5"
+        "workerman/workerman": "^3.5",
+        "symfony/dotenv": "^3.4"
     },
     "license": "MIT",
     "authors": [
