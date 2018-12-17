@@ -47,7 +47,6 @@ $worker->onWorkerStart = function($worker) {
         $diff = array_udiff($freshdata['data'], $GLOBALS['posts']['data'], 'compare_function');
 
         if (sizeof($diff) > 0) {
-          $GLOBALS['posts'] = $freshdata;
           console_log("Got ".sizeof($diff)." new posts!");
           foreach($worker->connections as $conn) {
             $conn->send(json_encode($freshdata['data']));
@@ -55,6 +54,7 @@ $worker->onWorkerStart = function($worker) {
         } else {
           console_log("No changes at all.");
         }
+        $GLOBALS['posts'] = $freshdata;
       }
     });
   } else {
