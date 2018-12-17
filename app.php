@@ -1,12 +1,14 @@
 <?php
-require_once 'Config.php';
 require_once __DIR__.'/vendor/autoload.php';
+require_once 'Config.php';
 
 use Workerman\Worker;
 use Workerman\Lib\Timer;
 
-$worker = new Worker('websocket://0.0.0.0:'.Config::PORT);
-Worker::$daemonize = !Config::DEBUG_MODE;
+$GLOBALS['config'] = new Config();
+
+$worker = new Worker('websocket://0.0.0.0:'.$GLOBALS['config']->PORT);
+Worker::$daemonize = !$GLOBALS['config']->DEBUG_MODE;
 
 function console_log($str) {
   $data = date('Y.m.d H:i:s');
@@ -14,7 +16,7 @@ function console_log($str) {
 }
 
 function getInstagramPosts() {
-  $url = "https://api.instagram.com/v1/users/self/media/recent/?access_token=".Config::ACCESS_TOKEN."&count=".Config::COUNT;
+  $url = "https://api.instagram.com/v1/users/self/media/recent/?access_token=".$GLOBALS['config']->ACCESS_TOKEN."&count=".$GLOBALS['config']->COUNT;
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_HEADER, false);
@@ -41,7 +43,7 @@ $GLOBALS['posts'] = getInstagramPosts();
 
 $worker->onWorkerStart = function($worker) {
   if ($GLOBALS['posts']['meta']['code'] === 200) {
-    Timer::add(Config::REFRESH_DELAY, function() use($worker) {
+    Timer::add($GLOBALS['config']->REFRESH_DELAY, function() use($worker) {
       $freshdata = getInstagramPosts();
       if ($freshdata['meta']['code'] === 200) {
         $diff = array_udiff($freshdata['data'], $GLOBALS['posts']['data'], 'compare_function');
@@ -65,12 +67,12 @@ $worker->onWorkerStart = function($worker) {
 $worker->onConnect = function($conn) {
   console_log("New connection from ".$conn->getRemoteIp());
   $conn->onWebSocketConnect = function($conn, $http_header) {
-    $connection_valid = Config::ALLOWED_ORIGINS !== '*'
-      ? in_array($_SERVER['HTTP_ORIGIN'], Config::ALLOWED_ORIGINS)
+    $connection_valid = $GLOBALS['config']->ALLOWED_ORIGINS !== '*'
+      ? in_array($_SERVER['HTTP_ORIGIN'], explode(',', $GLOBALS['config']->ALLOWED_ORIGINS))
       : true;
-    if (Config::DEBUG_MODE) {
+    if ($GLOBALS['config']->DEBUG_MODE) {
       console_log("The origin is " . $_SERVER['HTTP_ORIGIN']);
-      console_log("The allowed origin is " . Config::ALLOWED_ORIGINS);
+      console_log("The allowed origin is " . $GLOBALS['config']->ALLOWED_ORIGINS);
       console_log("The origin is " . ($connection_valid ? "" : "not ") . "valid!");
     }
     if (!$connection_valid) {

@@ -4,7 +4,7 @@
     "type": "project",
     "require": {
         "workerman/workerman": "^3.5",
-        "symfony/dotenv": "^3.4"
+        "vlucas/phpdotenv": "^2.5"
     },
     "license": "MIT",
     "authors": [
